@@ -83,10 +83,19 @@
       color: #000;
       text-shadow: 0 4px 10px rgba(0,0,0,0.05);
     }
-    .controls {
+
+    #menu-overlay {
       position: fixed;
-      top: 50%; left: 50%;
-      transform: translate(calc(50vw - 45px), calc(50vh - 45px)) scale(0.1);
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.05);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      backdrop-filter: blur(0px);
+      transition: all 0.5s ease;
+    }
+    .controls {
       background: rgba(255, 255, 255, 0.65);
       backdrop-filter: blur(30px) saturate(180%);
       -webkit-backdrop-filter: blur(30px) saturate(180%);
@@ -95,19 +104,66 @@
       width: 280px;
       box-shadow: 0 20px 40px rgba(0,0,0,0.15);
       border: 1px solid rgba(255,255,255,0.4);
-      z-index: 150;
+      transform: translate(calc(50vw - 45px), calc(50vh - 45px)) scale(0.1);
       opacity: 0;
-      pointer-events: none;
       transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
       color: #000;
     }
-    .controls select {
+
+    /* 自訂下拉選單樣式 */
+    .custom-select-container {
+      position: relative;
+      display: inline-block;
+      min-width: 120px;
+      vertical-align: middle;
       margin-left: 8px;
-      padding: 4px;
-      border-radius: 4px;
-      border: 1px solid rgba(0,0,0,0.1);
-      color: #000;
     }
+    .select-trigger {
+      background: rgba(255, 255, 255, 0.5);
+      border: 1px solid rgba(0,0,0,0.1);
+      padding: 6px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+      transition: all 0.3s;
+      color: #000; /* 確保觸發框文字顏色 */
+    }
+    .select-trigger:hover { background: rgba(255, 255, 255, 0.8); }
+    .select-trigger small { transition: transform 0.3s ease; }
+    .select-trigger span { flex-grow: 1; text-align: left; }
+
+    .select-options {
+      position: absolute;
+      top: calc(100% + 6px); left: 0; right: 0;
+      background: rgba(255, 255, 255, 0.6); /* 降低透明度增強磨砂感 */
+      backdrop-filter: blur(25px) saturate(180%);
+      -webkit-backdrop-filter: blur(25px) saturate(180%);
+      border: 1px solid rgba(255,255,255,0.5);
+      border-radius: 14px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px) scale(0.95);
+      transform-origin: top center;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 10;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+    }
+    .select-options div { padding: 10px 12px; cursor: pointer; transition: 0.2s; font-size: 14px; color: #000; }
+    .select-options div:hover { background: rgba(173, 213, 255, 0.3); }
+    
+    /* 開啟時的動畫狀態 */
+    .custom-select-container.active .select-options {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0) scale(1);
+    }
+    .custom-select-container.active .select-trigger { border-color: #add5ff; }
+    .custom-select-container.active .select-trigger small { transform: rotate(180deg); }
+
     .controls button.dev-btn {
       display: block;
       width: 100%;
@@ -143,18 +199,6 @@
       border: 1px solid rgba(255,255,255,0.3);
       color: #000;
     }
-    #close-btn {
-      margin-top: 8px;
-      background: rgba(255, 255, 255, 0.4);
-      color: #000;
-      border: 1px solid rgba(0, 0, 0, 0.05);
-      padding:6px 10px;
-      border-radius:6px;
-      cursor:pointer;
-      width: 100%;
-      transition: all 0.2s;
-    }
-    #close-btn:hover { background: rgba(0,0,0,0.1); }
 
     .developer-modal {
       position: fixed;
@@ -223,16 +267,25 @@
     }
     .developer-close {
       position: absolute;
-      top: 8px; right: 12px;
-      background: #900;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      padding: 4px 8px;
+      top: 12px; right: 12px;
+      width: 28px;
+      height: 28px;
+      background: rgba(255, 255, 255, 0.4);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      color: #000;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      font-size: 14px;
+      font-weight: bold;
     }
-    .developer-close:active { transform: scale(0.85); }
+    .developer-close:hover { background: rgba(255, 255, 255, 0.6); transform: scale(1.1); }
+    .developer-close:active { transform: scale(0.9); }
 
     /* Apple 風格搜尋按鈕與視窗 */
     #search-btn {
@@ -378,6 +431,43 @@
       border-radius: 14px;
       background: white;
     }
+
+    /* 自訂主題視窗樣式 */
+    #custom-theme-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(0px);
+      -webkit-backdrop-filter: blur(0px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 250;
+      transition: all 0.5s ease;
+    }
+    .custom-theme-modal {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(30px) saturate(180%);
+      -webkit-backdrop-filter: blur(30px) saturate(180%);
+      padding: 25px;
+      border-radius: 24px;
+      width: 350px;
+      max-width: 85%;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+      border: 1px solid rgba(255,255,255,0.4);
+      transform: scale(0.8);
+      opacity: 0;
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      text-align: center;
+    }
+    .custom-theme-modal h3 { margin-top: 0; margin-bottom: 15px; font-size: 18px; }
+    .custom-theme-modal input {
+      width: 100%; padding: 10px; margin-bottom: 15px;
+      border-radius: 10px; border: 1px solid rgba(0,0,0,0.1);
+      box-sizing: border-box; outline: none; background: rgba(255,255,255,0.5);
+    }
+    .custom-theme-modal .btns { display: flex; gap: 10px; }
+    .custom-theme-modal .btns button { flex: 1; padding: 10px; border-radius: 10px; border: none; cursor: pointer; font-weight: bold; transition: 0.3s; }
   </style>
 </head>
 <body>
@@ -419,31 +509,53 @@
     </div>
   </div>
 
+  <div id="custom-theme-overlay">
+    <div class="custom-theme-modal" id="custom-theme-modal">
+      <h3>自訂背景圖片</h3>
+      <input type="text" id="custom-url-input" placeholder="請貼上圖片網址 (URL)...">
+      <div class="btns">
+        <button id="custom-theme-save" style="background: #add5ff; color: #000;">儲存</button>
+        <button id="custom-theme-cancel" style="background: rgba(0,0,0,0.05); color: #000;">取消</button>
+      </div>
+    </div>
+  </div>
+
   <div id="menu-btn">☰</div>
 
-  <div class="controls">
-    <span>字體大小：</span>
-    <select id="size-selector">
-      <option value="small">小</option>
-      <option value="medium">中</option>
-      <option value="large">大</option>
-    </select>
-    <br><br>
-    <span>佈景主題：</span>
-    <select id="theme-selector" style="margin-left:8px;">
-      <option value="default">預設</option>
-      <option value="illustration">插圖</option>
-    </select>
-    <br><br>
-    <span>顯示模式：</span>
-    <select id="mode-selector">
-      <option value="days">天</option>
-      <option value="dhm">天時分</option>
-      <option value="dhms">天時分秒</option>
-    </select>
-    <br>
-    <button class="dev-btn" id="dev-btn">開發者</button>
-    <button id="close-btn">✕</button>
+  <div id="menu-overlay">
+    <div class="controls">
+      <span>字體大小：</span>
+      <div class="custom-select-container" id="size-dropdown">
+        <div class="select-trigger" data-value="medium"><span>中</span><small>▼</small></div>
+        <div class="select-options">
+          <div data-value="small">小</div>
+          <div data-value="medium">中</div>
+          <div data-value="large">大</div>
+        </div>
+      </div>
+      <br><br>
+      <span>佈景主題：</span>
+      <div class="custom-select-container" id="theme-dropdown">
+        <div class="select-trigger" data-value="default"><span>預設</span><small>▼</small></div>
+        <div class="select-options">
+          <div data-value="default">預設</div>
+          <div data-value="illustration">插圖</div>
+          <div data-value="custom">自訂</div>
+        </div>
+      </div>
+      <br><br>
+      <span>顯示模式：</span>
+      <div class="custom-select-container" id="mode-dropdown">
+        <div class="select-trigger" data-value="days"><span>天</span><small>▼</small></div>
+        <div class="select-options">
+          <div data-value="days">天</div>
+          <div data-value="dhm">天時分</div>
+          <div data-value="dhms">天時分秒</div>
+        </div>
+      </div>
+      <br><br>
+      <button class="dev-btn" id="dev-btn">開發者</button>
+    </div>
   </div>
 
   <div class="developer-modal" id="developer-modal">
@@ -473,11 +585,50 @@
 
     document.getElementById("today-date").textContent = todayStrFormal;
 
-    const sizeSelector = document.getElementById("size-selector");
     const countdownEl = document.getElementById("countdown");
-    const themeSelector = document.getElementById("theme-selector");
-    const modeSelector = document.getElementById("mode-selector");
+
+    function setupCustomSelect(id, onChange) {
+      const container = document.getElementById(id);
+      const trigger = container.querySelector('.select-trigger');
+      const options = container.querySelectorAll('.select-options div');
+      
+      trigger.addEventListener('click', () => {
+        document.querySelectorAll('.custom-select-container').forEach(c => {
+          if(c !== container) c.classList.remove('active');
+        });
+        container.classList.toggle('active');
+      });
+
+      options.forEach(opt => {
+        opt.addEventListener('click', () => {
+          const val = opt.dataset.value;
+          const text = opt.textContent;
+          trigger.querySelector('span').textContent = text;
+          trigger.dataset.value = val;
+          container.classList.remove('active');
+          onChange(val);
+        });
+      });
+
+      // 點擊外面關閉
+      document.addEventListener('click', (e) => {
+        if (!container.contains(e.target)) container.classList.remove('active');
+      });
+
+      return {
+        setValue: (val) => {
+          const opt = Array.from(options).find(o => o.dataset.value === val);
+          if(opt) {
+            trigger.querySelector('span').textContent = opt.textContent;
+            trigger.dataset.value = val;
+          }
+        },
+        getValue: () => trigger.dataset.value
+      };
+    }
+
     const controls = document.querySelector(".controls");
+    const menuOverlay = document.getElementById("menu-overlay");
     const menuBtn = document.getElementById("menu-btn");
 
     function applySize(size){
@@ -491,8 +642,11 @@
     function applyTheme(theme){
       const body = document.body;
       const container = document.querySelector(".container");
-      if(theme === "illustration"){
-        body.style.background = "url('https://github.com/Ruixue9626/Daily-ru/raw/71cc75b2a5378ffde696448da0a112e2af934dfe/images.jpeg') center/cover no-repeat";
+      const customUrl = localStorage.getItem("customThemeUrl");
+
+      if(theme === "illustration" || (theme === "custom" && customUrl)){
+        const url = theme === "illustration" ? "https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?q=80&w=1974&auto=format&fit=crop" : customUrl;
+        body.style.background = `url('${url}') center/cover no-repeat`;
         container.style.display = "none";
       } else {
         body.style.background = "linear-gradient(135deg, #ffe8f3, #d9f3ff)";
@@ -511,7 +665,7 @@
     function updateCountdown() {
       const now = new Date();
       const diffTime = examDate - now;
-      const mode = modeSelector.value;
+      const mode = localStorage.getItem("countdownMode") || "days";
       let countdownText = "";
 
       if (diffTime <= 0) {
@@ -557,48 +711,109 @@
       countdownInterval = setInterval(updateCountdown, updateRate);
     }
 
+    // 自訂主題視窗邏輯
+    const customThemeOverlay = document.getElementById('custom-theme-overlay');
+    const customThemeModal = document.getElementById('custom-theme-modal');
+    const customUrlInput = document.getElementById('custom-url-input');
+    const customThemeSave = document.getElementById('custom-theme-save');
+    const customThemeCancel = document.getElementById('custom-theme-cancel');
+
+    function openCustomThemeModal() {
+      customThemeOverlay.style.display = 'flex';
+      setTimeout(() => {
+        customThemeOverlay.style.backdropFilter = 'blur(10px)';
+        customThemeModal.style.transform = 'scale(1)';
+        customThemeModal.style.opacity = '1';
+        customUrlInput.focus();
+      }, 10);
+    }
+
+    function closeCustomThemeModal() {
+      customThemeModal.style.transform = 'scale(0.8)';
+      customThemeModal.style.opacity = '0';
+      customThemeOverlay.style.backdropFilter = 'blur(0px)';
+      setTimeout(() => {
+        customThemeOverlay.style.display = 'none';
+      }, 500);
+    }
+
+    // 初始化下拉選單
+    const sizeDropdown = setupCustomSelect("size-dropdown", (val) => {
+      applySize(val);
+      localStorage.setItem("countdownSize", val);
+    });
+
+    const modeDropdown = setupCustomSelect("mode-dropdown", (val) => {
+      localStorage.setItem("countdownMode", val);
+      setCountdownMode(val);
+    });
+
+    const themeDropdown = setupCustomSelect("theme-dropdown", (val) => {
+      if (val === "custom") {
+        openCustomThemeModal();
+      } else {
+        applyTheme(val);
+        localStorage.setItem("theme", val);
+      }
+    });
+
+    customThemeSave.addEventListener("click", () => {
+      const url = customUrlInput.value.trim();
+      if (url) {
+        localStorage.setItem("customThemeUrl", url);
+        localStorage.setItem("theme", "custom");
+        applyTheme("custom");
+        closeCustomThemeModal();
+      }
+    });
+
+    customThemeCancel.addEventListener("click", () => {
+      const prevTheme = localStorage.getItem("theme") || "default";
+      themeDropdown.setValue(prevTheme);
+      closeCustomThemeModal();
+    });
+
     const savedSize = localStorage.getItem("countdownSize") || "medium";
-    sizeSelector.value = savedSize;
+    sizeDropdown.setValue(savedSize);
     applySize(savedSize);
+    
     const savedTheme = localStorage.getItem("theme") || "default";
-    themeSelector.value = savedTheme;
+    themeDropdown.setValue(savedTheme);
     applyTheme(savedTheme);
+    
     const savedMode = localStorage.getItem("countdownMode") || "days";
-    modeSelector.value = savedMode;
+    modeDropdown.setValue(savedMode);
     setCountdownMode(savedMode);
 
-    sizeSelector.addEventListener("change", (e) => {
-      const newSize = e.target.value;
-      applySize(newSize);
-      localStorage.setItem("countdownSize", newSize);
-    });
-    themeSelector.addEventListener("change", (e) => {
-      const newTheme = e.target.value;
-      applyTheme(newTheme);
-      localStorage.setItem("theme", newTheme);
-    });
-    modeSelector.addEventListener("change", (e) => {
-      const newMode = e.target.value;
-      setCountdownMode(newMode);
-      localStorage.setItem("countdownMode", newMode);
+    function openMenu() {
+      menuOverlay.style.display = 'flex';
+      menuBtn.style.transform = 'scale(0) rotate(90deg)';
+      menuBtn.style.opacity = '0';
+      
+      setTimeout(() => {
+        menuOverlay.style.backdropFilter = 'blur(10px)';
+        controls.style.transform = 'translate(0, 0) scale(1)';
+        controls.style.opacity = '1';
+      }, 10);
+    }
+
+    function closeMenu() {
+      controls.style.transform = 'translate(calc(50vw - 45px), calc(50vh - 45px)) scale(0.1)';
+      controls.style.opacity = '0';
+      menuOverlay.style.backdropFilter = 'blur(0px)';
+      setTimeout(() => {
+        menuOverlay.style.display = 'none';
+        menuBtn.style.transform = 'scale(1) rotate(0deg)';
+        menuBtn.style.opacity = '1';
+      }, 600);
+    }
+
+    menuBtn.addEventListener("click", () => {
+      openMenu();
     });
 
-    const closeBtn = document.getElementById("close-btn");
-    menuBtn.addEventListener("click", () => {
-      controls.style.opacity = "1";
-      controls.style.pointerEvents = "auto";
-      controls.style.transform = "translate(-50%, -50%) scale(1)";
-      menuBtn.style.transform = "scale(0) rotate(90deg)";
-      menuBtn.style.opacity = "0";
-    });
-    closeBtn.addEventListener("click", () => {
-      controls.style.opacity = "0";
-      controls.style.pointerEvents = "none";
-      controls.style.transform = "translate(calc(50vw - 45px), calc(50vh - 45px)) scale(0.1)";
-      setTimeout(() => {
-        menuBtn.style.transform = "scale(1) rotate(0deg)";
-        menuBtn.style.opacity = "1";
-      }, 300);
+    menuOverlay.addEventListener('click', (e) => {
+      if (e.target === menuOverlay) closeMenu();
     });
 
     const devBtn = document.getElementById("dev-btn");
