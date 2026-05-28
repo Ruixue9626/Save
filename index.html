@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>畢業倒數</title>
   <link rel="icon" href="https://raw.githubusercontent.com/Ruixue9626/Daily-ru/bda8ea8e35c3a68a0b94b0b33c6962206dbc7228/%E7%84%A1%E6%A8%99%E9%A1%8C248_20250906113331.png" type="image/png">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
   <style>
     html, body {
@@ -199,6 +200,32 @@
       border: 1px solid rgba(255,255,255,0.3);
       color: #000;
     }
+    
+    /* 彩帶按鈕樣式 */
+    #celebrate-btn {
+      position: fixed;
+      right: 80px; /* 位於漢堡選單 (right: 20px) 的左側 */
+      bottom: 20px;
+      width: 50px;
+      height: 50px;
+      background: rgba(255, 255, 255, 0.35); /* 更輕薄的磨砂材質 */
+      backdrop-filter: blur(15px) saturate(180%);
+      -webkit-backdrop-filter: blur(15px) saturate(180%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      cursor: pointer;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15); /* 增強陰影層次 */
+      z-index: 100;
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      color: #000;
+    }
+    #celebrate-btn:hover { transform: scale(1.1); background: rgba(255, 255, 255, 0.9); }
+    #celebrate-btn:active { transform: scale(0.9); }
+
 
     .developer-modal {
       position: fixed;
@@ -518,6 +545,10 @@
         <button id="custom-theme-cancel" style="background: rgba(0,0,0,0.05); color: #000;">取消</button>
       </div>
     </div>
+  </div>
+
+  <div id="celebrate-btn">
+    <img id="celebrate-img" src="https://www.google.com/logos/fnbx/new_years/icon_idle_2021.gif" alt="celebrate" style="width: 70%; height: 70%; object-fit: contain;">
   </div>
 
   <div id="menu-btn">☰</div>
@@ -949,6 +980,57 @@
     weatherOverlay.addEventListener('click', (e) => {
       if (e.target === weatherOverlay) closeWeather();
     });
+
+    // 彩帶特效邏輯
+    const celebrateBtn = document.getElementById('celebrate-btn');
+    const celebrateImg = document.getElementById('celebrate-img');
+    
+    async function googleStyleConfetti(event) {
+        if (celebrateBtn.style.pointerEvents === 'none') return;
+        
+        // 獲取按鈕在螢幕上的座標比例 (0 到 1)
+        const rect = celebrateBtn.getBoundingClientRect();
+        const x = (rect.left + rect.width / 2) / window.innerWidth;
+        const y = (rect.top + rect.height / 2) / window.innerHeight;
+
+        celebrateBtn.style.pointerEvents = 'none'; // 防止重複點擊
+
+        // 1. 切換為爆開圖示並稍微放大，且按鈕保持顯示
+        celebrateImg.src = 'https://www.google.com/logos/fnbx/new_years/icon_popped_2021.png';
+        celebrateBtn.style.transform = 'scale(1.15)'; 
+        celebrateBtn.style.background = 'rgba(255, 255, 255, 0.8)'; // 爆開時稍微變亮
+
+        // 2. 開始噴發彩帶
+        const duration = 2.0 * 1000; // 持續噴發 2 秒
+        const end = Date.now() + duration;
+
+        (function frame() {
+            confetti({
+                particleCount: 15,     // 增加密度
+                angle: 135,            // 往左上噴
+                spread: 70,            // 集中噴射角度
+                startVelocity: 70,     // 強力噴射，覆蓋半個螢幕以上
+                origin: { x: x, y: y }, // 從按鈕中心噴出
+                gravity: 1.2,          // 物理重力感
+                colors: ['#26ccff', '#a25afd', '#ff5e7e', '#88ff5a', '#fcff42', '#ffa62d', '#ff36ff'],
+                scalar: 0.8,           // 粒子縮小一點看起來更精緻
+                zIndex: 999            // 確保彩帶在按鈕及其他 UI 之上
+            });
+
+            if (Date.now() < end) {
+                requestAnimationFrame(frame);
+            }
+        }());
+
+        // 3. 等待噴發結束後恢復原狀
+        await new Promise(resolve => setTimeout(resolve, 2500));
+        
+        celebrateImg.src = 'https://www.google.com/logos/fnbx/new_years/icon_idle_2021.gif';
+        celebrateBtn.style.transform = ''; 
+        celebrateBtn.style.background = '';
+        celebrateBtn.style.pointerEvents = 'auto';
+    }
+    celebrateBtn.addEventListener('click', googleStyleConfetti);
   </script>
 </body>
 </html>
